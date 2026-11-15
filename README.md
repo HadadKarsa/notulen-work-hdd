@@ -33,14 +33,30 @@ docker run -d --name notulen -p 8000:8000 \
 curl -s localhost:8000/health
 ```
 
-## Di mana database disimpan
+## Persistence
 
-SQLite, satu berkas. Lokasi ditentukan env var `DB_PATH`:
+> **Volume WAJIB dipasang di `/data`.** Tanpa itu, semua catatan hilang saat container dibuat ulang
+> — diam-diam, tanpa error, dan baru ketahuan ketika datanya sudah tidak ada.
 
-- di container: `/data/notulen.db` (mount volume ke `/data`, kalau tidak datanya hilang saat container dibuang)
-- di luar container, kalau `DB_PATH` tidak diset: `<root repo>/data/notulen.db`
+Database SQLite ada di `/data/notulen.db` (diatur lewat env var `DB_PATH`). Direktori `/data`
+dideklarasikan sebagai `VOLUME` di Dockerfile, jadi docker membuat volume anonim kalau kamu tidak
+menyebut satu pun — itu tetap menyimpan data, tapi sulit ditemukan dan mudah terlewat saat migrasi.
+Sebut volumenya secara eksplisit:
 
-Skema dibuat otomatis saat aplikasi start.
+```bash
+docker run -d --name notulen -p 8000:8000 \
+  -v notulen-data:/data \
+  -e APP_PASSWORD='rahasia' \
+  notulen
+```
+
+Atau dengan bind mount, seperti di contoh `docker run` di atas (`-v "$PWD/data:/data"`).
+
+Di luar container, kalau `DB_PATH` tidak diset, database jatuh ke `<root repo>/data/notulen.db`.
+
+Skema dibuat otomatis saat aplikasi start (`CREATE TABLE IF NOT EXISTS`), tidak ada langkah migrasi.
+Untuk backup, cukup salin berkas `notulen.db` saat container berhenti — atau pakai
+`docker run --rm -v notulen-data:/data -v "$PWD:/backup" alpine cp /data/notulen.db /backup/`.
 
 ## Test
 

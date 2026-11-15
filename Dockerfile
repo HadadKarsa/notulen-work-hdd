@@ -11,6 +11,7 @@ COPY --from=builder /opt/venv /opt/venv
 COPY app ./app
 RUN mkdir -p /data && chown -R 10001:10001 /data /app
 ENV DB_PATH=/data/notulen.db
+VOLUME ["/data"]
 USER 10001:10001
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
