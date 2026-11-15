@@ -1,27 +1,33 @@
 {% extends "base.html" %}
-{% block title %}{% if entry %}Ubah{% else %}Catatan baru{% endif %} — notulen{% endblock %}
+{% block title %}{% if entry and entry.id %}Ubah catatan · notulen{% else %}Catatan baru · notulen{% endif %}{% endblock %}
 {% block content %}
-<h1>{% if entry %}Ubah catatan{% else %}Catatan baru{% endif %}</h1>
-<form class="form" method="post" action="{{ action }}">
-  <label>Jenis
-    <select name="kind">
+<h1>{% if entry and entry.id %}Ubah catatan{% else %}Catatan baru{% endif %}</h1>
+<form class="form" method="post" action="{{ action }}" novalidate>
+  <div class="field{% if errors.kind %} has-error{% endif %}">
+    <label for="kind">Jenis</label>
+    <select id="kind" name="kind"{% if errors.kind %} aria-invalid="true" aria-describedby="kind-error"{% endif %}>
       {% for k, label in kind_labels.items() %}
       <option value="{{ k }}"{% if selected == k %} selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-  </label>
-  <label>Judul
-    <input type="text" name="title" required value="{{ entry.title if entry else '' }}">
-  </label>
-  <label>Isi (markdown)
-    <textarea name="body" rows="14">{{ entry.body if entry else '' }}</textarea>
-  </label>
-  <label>Tag (pisahkan dengan koma)
-    <input type="text" name="tags" value="{{ entry.tags if entry else '' }}" placeholder="docker, backup">
-  </label>
+    {% if errors.kind %}<p class="field-error" id="kind-error">{{ errors.kind }}</p>{% endif %}
+  </div>
+  <div class="field{% if errors.title %} has-error{% endif %}">
+    <label for="title">Judul</label>
+    <input id="title" type="text" name="title" value="{{ entry.title if entry else '' }}"{% if errors.title %} aria-invalid="true" aria-describedby="title-error"{% endif %}>
+    {% if errors.title %}<p class="field-error" id="title-error">{{ errors.title }}</p>{% endif %}
+  </div>
+  <div class="field">
+    <label for="body">Isi (markdown)</label>
+    <textarea id="body" name="body" rows="14">{{ entry.body if entry else '' }}</textarea>
+  </div>
+  <div class="field">
+    <label for="tags">Tag (pisahkan dengan koma)</label>
+    <input id="tags" type="text" name="tags" value="{{ entry.tags if entry else '' }}" placeholder="docker, backup">
+  </div>
   <div class="actions">
     <button type="submit">Simpan</button>
-    <a class="link" href="{% if entry %}/entry/{{ entry.id }}{% else %}/{% endif %}">Batal</a>
+    <a class="btn quiet" href="{% if entry and entry.id %}/entry/{{ entry.id }}{% else %}/{% endif %}">Batal</a>
   </div>
 </form>
 {% endblock %}

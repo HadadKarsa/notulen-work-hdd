@@ -1,14 +1,26 @@
 {% extends "base.html" %}
-{% block title %}{{ entry.title }} — notulen{% endblock %}
+{% block title %}{{ entry.title }} · notulen{% endblock %}
 {% block content %}
-<article>
+<article class="note">
   <p class="kind k-{{ entry.kind }}">{{ kind_labels[entry.kind] }}</p>
   <h1>{{ entry.title }}</h1>
-  <p class="meta">Dibuat {{ entry.created_at[:16]|replace("T", " ") }}{% if entry.updated_at != entry.created_at %} · diubah {{ entry.updated_at[:16]|replace("T", " ") }}{% endif %}</p>
-  {% if entry.tags %}<p class="tags">{% for t in entry.tags.split(",") %}<span>{{ t.strip() }}</span>{% endfor %}</p>{% endif %}
-  <div class="prose">{{ entry.body|markdown }}</div>
+  <p class="entry-meta">
+    Dibuat {{ entry.created_at[:16]|replace("T", " ") }}
+    {% if entry.updated_at != entry.created_at %} · diubah {{ entry.updated_at[:16]|replace("T", " ") }}{% endif %}
+    {% if entry.pinned %} · disematkan{% endif %}
+  </p>
+  {% if entry.tags %}
+  <p class="tags">{% for t in entry.tags.split(",") %}<a class="tag" href="/?tag={{ t.strip()|urlencode }}">#{{ t.strip() }}</a>{% endfor %}</p>
+  {% endif %}
+  <div class="prose">
+    {{ entry.body|markdown }}
+  </div>
 </article>
+
 <div class="actions">
+  <form method="post" action="/entry/{{ entry.id }}/pin">
+    <button type="submit">{% if entry.pinned %}Lepas sematan{% else %}Sematkan{% endif %}</button>
+  </form>
   <a class="btn" href="/entry/{{ entry.id }}/edit">Ubah</a>
   <form method="post" action="/entry/{{ entry.id }}/delete" onsubmit="return confirm('Hapus catatan ini?')">
     <button class="danger" type="submit">Hapus</button>

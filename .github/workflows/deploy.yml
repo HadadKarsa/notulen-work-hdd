@@ -43,4 +43,4 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Summary
-        run: echo "Pushed ${{ env.IMAGE }}:${{ github.sha }} — the prod timer picks it up within 5 minutes."
+        run: echo "Pushed ${IMAGE}:${{ github.sha }}. Prod picks it up within 5 minutes."

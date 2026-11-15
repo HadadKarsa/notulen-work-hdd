@@ -1,32 +1,51 @@
 {% extends "base.html" %}
-{% block title %}notulen{% endblock %}
+{% block title %}{% if q %}Cari "{{ q }}" · notulen{% elif tag %}#{{ tag }} · notulen{% else %}notulen{% endif %}{% endblock %}
 {% block content %}
-<form class="search" method="get" action="/">
+<h1>Catatan</h1>
+
+<form class="search" method="get" action="/" role="search">
   {% if kind %}<input type="hidden" name="kind" value="{{ kind }}">{% endif %}
-  <input type="search" name="q" value="{{ q }}" placeholder="Cari judul, isi, tag…" aria-label="Cari catatan">
+  {% if tag %}<input type="hidden" name="tag" value="{{ tag }}">{% endif %}
+  {% if pinned %}<input type="hidden" name="pinned" value="{{ pinned }}">{% endif %}
+  <label class="visually-hidden" for="q">Cari catatan</label>
+  <input id="q" type="search" name="q" value="{{ q }}" placeholder="Cari judul, tag, atau isi" autocomplete="off">
   <button type="submit">Cari</button>
 </form>
 
-<nav class="chips">
-  <a class="chip{% if not kind %} on{% endif %}" href="/{% if q %}?q={{ q|urlencode }}{% endif %}">Semua</a>
+<nav class="chips" aria-label="Saring menurut jenis">
+  <a class="chip{% if not kind %} on{% endif %}" href="/{% if q %}?q={{ q|urlencode }}{% endif %}"{% if not kind %} aria-current="page"{% endif %}>Semua</a>
   {% for k, label in kind_labels.items() %}
-  <a class="chip{% if kind == k %} on{% endif %}" href="/?kind={{ k }}{% if q %}&q={{ q|urlencode }}{% endif %}">{{ label }}</a>
+  <a class="chip{% if kind == k %} on{% endif %}" href="/?kind={{ k }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}"{% if kind == k %} aria-current="page"{% endif %}>{{ label }}</a>
   {% endfor %}
+  <a class="chip{% if pinned == '1' %} on{% endif %}" href="/?pinned=1{% if q %}&amp;q={{ q|urlencode }}{% endif %}"{% if pinned == '1' %} aria-current="page"{% endif %}>Disematkan</a>
 </nav>
+
+{% if tag %}
+<p class="filter-note">Menampilkan tag <strong>#{{ tag }}</strong>. <a href="/{% if q %}?q={{ q|urlencode }}{% endif %}">Hapus saringan tag</a></p>
+{% endif %}
 
 {% if entries %}
 <ul class="entries">
   {% for e in entries %}
-  <li>
+  <li class="entry-item{% if e.pinned %} is-pinned{% endif %}">
     <a class="entry" href="/entry/{{ e.id }}">
-      <span class="kind k-{{ e.kind }}">{{ kind_labels[e.kind] }}</span>
-      <span class="title">{{ e.title }}</span>
-      <span class="meta">{{ e.created_at[:10] }}{% if e.tags %} · {{ e.tags }}{% endif %}</span>
+      <span class="entry-head">
+        <span class="kind k-{{ e.kind }}">{{ kind_labels[e.kind] }}</span>
+        {% if e.pinned %}<span class="pin-mark">Disematkan</span>{% endif %}
+      </span>
+      <span class="entry-title">{{ e.title }}</span>
+      <span class="entry-meta">{{ e.created_at[:10] }}{% if e.tags %} · {{ e.tags }}{% endif %}</span>
     </a>
   </li>
   {% endfor %}
 </ul>
+{% elif q %}
+<p class="empty">Tidak ada catatan yang cocok dengan <strong>"{{ q }}"</strong>. <a href="/">Hapus pencarian</a> atau <a href="/new">buat catatan baru</a>.</p>
+{% elif tag %}
+<p class="empty">Belum ada catatan dengan tag <strong>#{{ tag }}</strong>. <a href="/">Lihat semua catatan</a>.</p>
+{% elif pinned == '1' %}
+<p class="empty">Belum ada catatan yang disematkan. Buka satu catatan, lalu sematkan supaya selalu di atas.</p>
 {% else %}
-<p class="empty">Belum ada catatan{% if q or kind %} yang cocok{% endif %}. <a href="/new">Buat yang pertama</a>.</p>
+<p class="empty">Belum ada catatan. <a href="/new">Buat catatan pertama</a>.</p>
 {% endif %}
 {% endblock %}
