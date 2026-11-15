@@ -10,6 +10,7 @@ WORKDIR /app
 COPY --from=builder /opt/venv /opt/venv
 COPY app ./app
 RUN mkdir -p /data && chown -R 10001:10001 /data /app
+VOLUME ["/data"]
 ENV DB_PATH=/data/notulen.db
 USER 10001:10001
 EXPOSE 8000

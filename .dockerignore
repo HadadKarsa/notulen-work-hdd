@@ -9,3 +9,4 @@ data
 .env
 tests
 *.bak-*
+.pytest_cache

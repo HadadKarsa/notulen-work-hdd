@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Tag · notulen{% endblock %}
+{% block content %}
+<h1>Tag</h1>
+{% if tags %}
+<p class="lede">{{ tags|length }} tag, diurutkan dari yang paling sering dipakai.</p>
+<ul class="tag-list">
+  {% for name, count in tags %}
+  <li><a class="tag" href="/?tag={{ name|urlencode }}">#{{ name }}</a> <span class="tag-count">{{ count }}</span></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">Belum ada tag. Tag muncul di sini setelah kamu menuliskannya di sebuah catatan.</p>
+{% endif %}
+{% endblock %}

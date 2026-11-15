@@ -1,21 +1,119 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}notulen{% endblock %}</title>
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem("notulen-theme");
+    var dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  } catch (e) {}
+})();
+</script>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+<a class="skip" href="#isi">Lompat ke isi</a>
 <header class="top">
-  <a class="brand" href="/">notulen</a>
-  <nav>
-    <a class="btn" href="/new">+ Baru</a>
-    {% if auth_on %}<a class="link" href="/logout">Keluar</a>{% endif %}
-  </nav>
+  <div class="wrap top-inner">
+    <a class="brand" href="/">notulen</a>
+    <nav class="nav" aria-label="Navigasi utama">
+      <a class="nav-link" href="/tags">Tag</a>
+      <a class="nav-link" href="/new">Catatan baru</a>
+      {% if auth_on %}<a class="nav-link" href="/logout">Keluar</a>{% endif %}
+      <button class="theme" type="button" id="theme-toggle" aria-label="Ganti ke mode gelap" aria-pressed="false">
+        <span class="theme-label">Gelap</span>
+      </button>
+    </nav>
+  </div>
 </header>
-<main>
+<main id="isi" class="wrap">
 {% block content %}{% endblock %}
 </main>
+<footer class="foot">
+  <div class="wrap">
+    <p>notulen, catatan kerja pribadi. Satu pengguna, tanpa akun.</p>
+  </div>
+</footer>
+<script>
+(function () {
+  var root = document.documentElement;
+  var button = document.getElementById("theme-toggle");
+  var label = button ? button.querySelector(".theme-label") : null;
+
+  function paint() {
+    var dark = root.getAttribute("data-theme") === "dark";
+    if (label) label.textContent = dark ? "Terang" : "Gelap";
+    if (button) {
+      button.setAttribute("aria-label", dark ? "Ganti ke mode terang" : "Ganti ke mode gelap");
+      button.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+  }
+
+  if (button) {
+    paint();
+    button.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("notulen-theme", next); } catch (e) {}
+      paint();
+    });
+  }
+
+  var blocks = document.querySelectorAll("pre");
+  Array.prototype.forEach.call(blocks, function (pre) {
+    var holder = document.createElement("div");
+    holder.className = "code";
+    pre.parentNode.insertBefore(holder, pre);
+    holder.appendChild(pre);
+
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "copy";
+    button.textContent = "Salin";
+    button.setAttribute("aria-label", "Salin blok kode ini");
+    holder.appendChild(button);
+
+    var timer = null;
+
+    function confirm(text) {
+      button.textContent = text;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { button.textContent = "Salin"; }, 2000);
+    }
+
+    function fallback(text) {
+      var area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.top = "-1000px";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(area);
+      confirm(ok ? "Tersalin" : "Gagal menyalin");
+    }
+
+    button.addEventListener("click", function () {
+      var text = pre.innerText;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          confirm("Tersalin");
+        }, function () {
+          fallback(text);
+        });
+      } else {
+        fallback(text);
+      }
+    });
+  });
+})();
+</script>
 </body>
 </html>
