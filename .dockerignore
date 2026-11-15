@@ -1,0 +1,11 @@
+.git
+.gitignore
+.github
+.venv
+__pycache__
+*.pyc
+*.db
+data
+.env
+tests
+*.bak-*

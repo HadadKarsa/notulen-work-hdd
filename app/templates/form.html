@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{% if entry %}Ubah{% else %}Catatan baru{% endif %} — notulen{% endblock %}
+{% block content %}
+<h1>{% if entry %}Ubah catatan{% else %}Catatan baru{% endif %}</h1>
+<form class="form" method="post" action="{{ action }}">
+  <label>Jenis
+    <select name="kind">
+      {% for k, label in kind_labels.items() %}
+      <option value="{{ k }}"{% if selected == k %} selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Judul
+    <input type="text" name="title" required value="{{ entry.title if entry else '' }}">
+  </label>
+  <label>Isi (markdown)
+    <textarea name="body" rows="14">{{ entry.body if entry else '' }}</textarea>
+  </label>
+  <label>Tag (pisahkan dengan koma)
+    <input type="text" name="tags" value="{{ entry.tags if entry else '' }}" placeholder="docker, backup">
+  </label>
+  <div class="actions">
+    <button type="submit">Simpan</button>
+    <a class="link" href="{% if entry %}/entry/{{ entry.id }}{% else %}/{% endif %}">Batal</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}notulen{% endblock %}
+{% block content %}
+<form class="search" method="get" action="/">
+  {% if kind %}<input type="hidden" name="kind" value="{{ kind }}">{% endif %}
+  <input type="search" name="q" value="{{ q }}" placeholder="Cari judul, isi, tag…" aria-label="Cari catatan">
+  <button type="submit">Cari</button>
+</form>
+
+<nav class="chips">
+  <a class="chip{% if not kind %} on{% endif %}" href="/{% if q %}?q={{ q|urlencode }}{% endif %}">Semua</a>
+  {% for k, label in kind_labels.items() %}
+  <a class="chip{% if kind == k %} on{% endif %}" href="/?kind={{ k }}{% if q %}&q={{ q|urlencode }}{% endif %}">{{ label }}</a>
+  {% endfor %}
+</nav>
+
+{% if entries %}
+<ul class="entries">
+  {% for e in entries %}
+  <li>
+    <a class="entry" href="/entry/{{ e.id }}">
+      <span class="kind k-{{ e.kind }}">{{ kind_labels[e.kind] }}</span>
+      <span class="title">{{ e.title }}</span>
+      <span class="meta">{{ e.created_at[:10] }}{% if e.tags %} · {{ e.tags }}{% endif %}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">Belum ada catatan{% if q or kind %} yang cocok{% endif %}. <a href="/new">Buat yang pertama</a>.</p>
+{% endif %}
+{% endblock %}

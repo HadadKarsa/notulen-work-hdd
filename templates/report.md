@@ -1,0 +1,10 @@
+repo:      {repo}
+branch:    {branch}
+commit:    {commit}
+changes:   {changes}
+build:     {build}
+test:      {test}
+port:      {port}
+health:    {health}
+risk:      {risk}
+pending:   {pending}
